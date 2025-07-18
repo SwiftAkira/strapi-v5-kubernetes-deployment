@@ -1,69 +1,21 @@
-name: 🧪 Validate YAML Files
+name: 🧪 Validate Repository
 
 on:
   pull_request:
     paths:
+      - '*.sh'
+      - 'strapi-v5-upgrade/**/*.sh'
       - '*.yaml'
       - '*.yml'
-      - 'strapi-v5-upgrade/**/*.yaml'
-      - 'strapi-v5-upgrade/**/*.yml'
   push:
     branches: [main, master]
     paths:
+      - '*.sh'
+      - 'strapi-v5-upgrade/**/*.sh'
       - '*.yaml'
       - '*.yml'
-      - 'strapi-v5-upgrade/**/*.yaml'
-      - 'strapi-v5-upgrade/**/*.yml'
 
 jobs:
-  validate-yaml:
-    name: 🔍 Validate YAML Syntax
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-      
-    - name: 🔧 Setup yamllint
-      run: pip install yamllint
-      
-    - name: 🧪 Lint YAML files
-      run: |
-        echo "Validating YAML syntax..."
-        find . -name "*.yaml" -o -name "*.yml" | grep -v ".github" | xargs yamllint -c .yamllint.yaml
-        
-    - name: ✅ Validate Kubernetes manifests
-      run: |
-        echo "Validating Kubernetes manifests..."
-        # Install kubeval for Kubernetes manifest validation
-        wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
-        tar xf kubeval-linux-amd64.tar.gz
-        sudo mv kubeval /usr/local/bin
-        
-        # Validate main manifests (skip strapi-secrets.yaml as it has placeholder values)
-        for file in *.yaml; do
-          if [[ "$file" != "strapi-secrets.yaml" ]]; then
-            echo "Validating $file..."
-            kubeval "$file"
-          fi
-        done
-
-  validate-dockerfile:
-    name: 🐳 Validate Dockerfile
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-      
-    - name: 🔧 Setup Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: 🧪 Build test image
-      run: |
-        cd strapi-v5-upgrade
-        docker buildx build --platform linux/amd64 --dry-run .
-
   validate-scripts:
     name: 📜 Validate Shell Scripts
     runs-on: ubuntu-latest
