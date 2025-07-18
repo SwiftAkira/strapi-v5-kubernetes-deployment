@@ -1,0 +1,99 @@
+name: 🧪 Validate YAML Files
+
+on:
+  pull_request:
+    paths:
+      - '*.yaml'
+      - '*.yml'
+      - 'strapi-v5-upgrade/**/*.yaml'
+      - 'strapi-v5-upgrade/**/*.yml'
+  push:
+    branches: [main, master]
+    paths:
+      - '*.yaml'
+      - '*.yml'
+      - 'strapi-v5-upgrade/**/*.yaml'
+      - 'strapi-v5-upgrade/**/*.yml'
+
+jobs:
+  validate-yaml:
+    name: 🔍 Validate YAML Syntax
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup yamllint
+      run: pip install yamllint
+      
+    - name: 🧪 Lint YAML files
+      run: |
+        echo "Validating YAML syntax..."
+        find . -name "*.yaml" -o -name "*.yml" | grep -v ".github" | xargs yamllint -c .yamllint.yaml
+        
+    - name: ✅ Validate Kubernetes manifests
+      run: |
+        echo "Validating Kubernetes manifests..."
+        # Install kubeval for Kubernetes manifest validation
+        wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+        tar xf kubeval-linux-amd64.tar.gz
+        sudo mv kubeval /usr/local/bin
+        
+        # Validate main manifests (skip strapi-secrets.yaml as it has placeholder values)
+        for file in *.yaml; do
+          if [[ "$file" != "strapi-secrets.yaml" ]]; then
+            echo "Validating $file..."
+            kubeval "$file"
+          fi
+        done
+
+  validate-dockerfile:
+    name: 🐳 Validate Dockerfile
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: 🧪 Build test image
+      run: |
+        cd strapi-v5-upgrade
+        docker buildx build --platform linux/amd64 --dry-run .
+
+  validate-scripts:
+    name: 📜 Validate Shell Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup shellcheck
+      run: sudo apt-get update && sudo apt-get install -y shellcheck
+      
+    - name: 🧪 Lint shell scripts
+      run: |
+        find . -name "*.sh" -exec shellcheck {} \;
+
+  check-secrets:
+    name: 🔐 Check for Secrets
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Scan for potential secrets
+      run: |
+        echo "Checking for potential secrets..."
+        # Check that strapi-secrets.yaml only contains placeholder values
+        if grep -q "742561979202\|dev-onair\|172\.16\.1\.152" *.yaml; then
+          echo "❌ Found non-generic values in YAML files!"
+          echo "Please ensure all configurations use placeholder values."
+          exit 1
+        fi
+        echo "✅ No hardcoded secrets found"

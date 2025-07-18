@@ -1,0 +1,35 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: strapi-config
+  namespace: strapi
+data:
+  DATABASE_CLIENT: postgres
+  DATABASE_HOST: strapi-postgres-postgresql.strapi.svc.cluster.local
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: strapi
+  DATABASE_USERNAME: strapi
+  HOST: "0.0.0.0"
+  PORT: "1337"
+  NODE_ENV: production
+  # Public URL for proper admin panel access (production server)
+  PUBLIC_URL: "https://your-domain.com"
+  # Admin panel URL configuration (production server)
+  STRAPI_ADMIN_BACKEND_URL: "https://your-domain.com"
+  ADMIN_PATH: "/admin"
+  # Strapi v5 specific configurations
+  STRAPI_PLUGIN_I18N_INIT_LOCALE_CODE: en
+  # Additional v5 configurations
+  STRAPI_TELEMETRY_DISABLED: "true"
+  STRAPI_LOG_LEVEL: "info"
+  # Vite/Development server configurations
+  DANGEROUSLY_DISABLE_HOST_CHECK: "true"
+  VITE_ALLOWED_HOSTS: "all"
+  VITE_HMR_HOST: "0.0.0.0"
+  VITE_HMR_PORT: "1337"
+  # Production CORS and host configuration
+  TRUSTED_HOSTS: "your-domain.com,private.your-domain.com,localhost,127.0.0.1"
+  CORS_ORIGIN: "https://your-domain.com,https://private.your-domain.com"
+  ADMIN_CORS_ORIGIN: "https://your-domain.com,https://private.your-domain.com"
+

@@ -1,0 +1,21 @@
+# ArgoCD ignore file
+# Place this file in your repository root to prevent ArgoCD from processing documentation files
+
+# Documentation files
+*.md
+LICENSE
+
+# Development/local files
+.git/
+.gitignore
+.DS_Store
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Optional: Ignore the upgrade directory if you don't want ArgoCD to process it
+# strapi-v5-upgrade/
